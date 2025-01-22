@@ -1,45 +1,58 @@
--- Các tham số điều kiện bên ngoài
-local _sv = _sv or 10  -- Số người chơi tối đa còn lại trong server (theo tham số từ ngoài)
-local _maxServers = _maxServers or 50  -- Số lượng server tối đa để tìm kiếm
+--[[ 
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
 
-local PlaceID = game.PlaceId
-local AllIDs = {}
-local foundAnything = ""
-local actualHour = os.date("!*t").hour
+local PlaceID = game.PlaceId  -- Lấy PlaceId của game hiện tại
+local AllIDs = {}  -- Mảng để lưu trữ các ID server đã từng vào
+local foundAnything = ""  -- Dùng để lưu trữ thông tin về server tiếp theo cần tìm
+local actualHour = os.date("!*t").hour  -- Lấy giờ hiện tại
+local _sv = 5  -- Số người chơi tối đa còn lại trong server (điều chỉnh theo nhu cầu của bạn)
+local _maxServers = 100  -- Số lượng server tối đa sẽ được tìm kiếm (điều chỉnh nếu cần)
 local Deleted = false
+
+-- Kiểm tra xem file đã tồn tại hay chưa
 local File = pcall(function()
     AllIDs = game:GetService('HttpService'):JSONDecode(readfile("NotSameServers.json"))
 end)
+
 if not File then
+    -- Nếu file chưa tồn tại, tạo mới và thêm giờ hiện tại vào
     table.insert(AllIDs, actualHour)
     writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
 end
 
+-- Hàm để trả về danh sách server và chọn server phù hợp
 function TPReturner()
     local Site
     if foundAnything == "" then
+        -- Lấy danh sách server từ API của Roblox
         Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=' .. _maxServers))
     else
+        -- Lấy danh sách server tiếp theo nếu có
         Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=' .. _maxServers .. '&cursor=' .. foundAnything))
     end
+
     local ID = ""
+    -- Kiểm tra nếu có server tiếp theo
     if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
         foundAnything = Site.nextPageCursor
     end
+
     local num = 0
     for i, v in pairs(Site.data) do
         local Possible = true
         ID = tostring(v.id)
-
-        -- Điều chỉnh điều kiện chọn server
-        -- Tìm các server có ít người chơi (số người chơi còn lại nhỏ hơn hoặc bằng _sv)
-        if tonumber(v.maxPlayers) - tonumber(v.playing) <= _sv then
+        
+        -- Điều kiện để chọn server có nhiều người chơi (số người chơi phải lớn hơn maxPlayers - _sv)
+        if tonumber(v.playing) >= (tonumber(v.maxPlayers) - _sv) then
+            -- Kiểm tra nếu server đã từng được vào
             for _, Existing in pairs(AllIDs) do
                 if num ~= 0 then
                     if ID == tostring(Existing) then
                         Possible = false
                     end
                 else
+                    -- Kiểm tra giờ hiện tại và xóa các server cũ
                     if tonumber(actualHour) ~= tonumber(Existing) then
                         local delFile = pcall(function()
                             delfile("NotSameServers.json")
@@ -50,6 +63,7 @@ function TPReturner()
                 end
                 num = num + 1
             end
+            -- Nếu server chưa từng vào thì sẽ teleport vào
             if Possible == true then
                 table.insert(AllIDs, ID)
                 wait()
@@ -64,10 +78,12 @@ function TPReturner()
     end
 end
 
+-- Hàm kiểm tra và teleport server
 function Teleport()
     while wait() do
         pcall(function()
             TPReturner()
+            -- Nếu tìm được server tiếp theo thì gọi lại hàm TPReturner
             if foundAnything ~= "" then
                 TPReturner()
             end
@@ -75,5 +91,5 @@ function Teleport()
     end
 end
 
--- Start teleportation
+-- Bắt đầu quá trình teleport
 Teleport()
