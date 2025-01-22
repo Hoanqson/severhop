@@ -6,7 +6,7 @@ local PlaceID = game.PlaceId  -- Lấy PlaceId của game hiện tại
 local AllIDs = {}  -- Mảng để lưu trữ các ID server đã từng vào
 local foundAnything = ""  -- Dùng để lưu trữ thông tin về server tiếp theo cần tìm
 local actualHour = os.date("!*t").hour  -- Lấy giờ hiện tại
-local _sv = 5  -- Số người chơi tối đa còn lại trong server (điều chỉnh theo nhu cầu của bạn)
+local _sv = 10  -- Số người chơi tối đa còn lại trong server (điều chỉnh theo nhu cầu của bạn)
 local _maxServers = 100  -- Số lượng server tối đa sẽ được tìm kiếm (điều chỉnh nếu cần)
 local Deleted = false
 
