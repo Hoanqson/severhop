@@ -1,6 +1,6 @@
 -- Các tham số điều kiện bên ngoài
 local _sv = _sv or 10  -- Số người chơi tối đa còn lại trong server (theo tham số từ ngoài)
-local _maxServers = _maxServers or 100  -- Số lượng server tối đa để tìm kiếm
+local _maxServers = _maxServers or 50  -- Số lượng server tối đa để tìm kiếm
 
 local PlaceID = game.PlaceId
 local AllIDs = {}
