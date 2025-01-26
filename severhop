@@ -1,7 +1,3 @@
---[[ 
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
-
 local PlaceID = game.PlaceId  -- Lấy PlaceId của game hiện tại
 local AllIDs = {}  -- Mảng để lưu trữ các ID server đã từng vào
 local foundAnything = ""  -- Dùng để lưu trữ thông tin về server tiếp theo cần tìm
